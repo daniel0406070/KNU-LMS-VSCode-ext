@@ -1,7 +1,9 @@
 import { json } from "stream/consumers";
 
+let Token_Json = JSON.parse("../token.json");
+
 const API_URL = "https://canvas.knu.ac.kr";
-const API_TOKEN;
+const API_TOKEN = Token_Json["token"];
 class LMS_API {
     constructor() { 
 
@@ -14,7 +16,7 @@ class LMS_API {
 
         let answer = null;
         fetch(url)
-            .then((response) => respoBnse.json())
+            .then((response) => response.json())
             .then((json) => {answer = json;})
             .catch((error) => {
                 console.log(error)
