@@ -1,0 +1,28 @@
+{
+    "version": "2.0.0",
+    "runner": "terminal",
+    "type": "shell",
+    "echoCommand": true,
+    "presentation": {
+        "reveal": "always"
+    },
+    "tasks": [
+        {
+            "type": "process",
+            "label": "TypeScript: tsc 활성 파일 빌드",
+            "command": "tsc",
+            "args": [
+                "-p",
+                "${fileDirname}/tsconfig.json"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "detail": "디버거에서 생성된 작업입니다."
+        }
+    ]
+}
