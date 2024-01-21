@@ -11,29 +11,23 @@ class LMS_API {
 
     }
 
-
-
-    direct_request(method: string)  {
+    async direct_request(method: string)  {
         const url = `${API_URL}/api/v1/${method}?access_token=${API_TOKEN}`;
 
-        fetch(url)
-            .then((response) => response.json())
-            .then((json) => {
-                console.log(json);
-                return json;
-            })
-            .catch((error) => {
-                console.log(error);
-                return null;
-            });
+        const responce = await fetch(url);
+        const json = await responce.json();
+        return json;
     }
 
-    get_courses() {
+    get_courses(): Promise<any> {
         return this.direct_request("courses");
     }
 
-    get_course(course_id: number) {
-        return new Course(course_id);
+    async get_course(course_id: number) {
+        const new_course = new Course(course_id);
+        await new_course.course_init(course_id);
+
+        return new_course;
     }
 }
 
@@ -44,23 +38,27 @@ class Course {
     constructor(id: number) {
         this.id = id;
         this.name = null;
-        this.course_init(id);
     }
 
-    course_init(course_id: number) {
-        const course_info = this.api.get_course(course_id);
-        if (course_info != null) {
-            this.id = course_info["id"];
-            this.name = course_info["name"];
-        }
+    async course_init(course_id: number) {
+        this.api.direct_request(`courses/${course_id}`).then((json) => {
+            this.id = json["id"];
+            this.name = json["name"];
+        })
+        .catch((error) => {
+            console.log(error);
+        });
     }
 
-    get_assignments() {
+    get_assignments(): Promise<any> {
         return this.api.direct_request(`courses/${this.id}/assignments`);
     }
 
-    get_assignment(assignment_id: number) {
-        return new assignment(assignment_id);
+    async get_assignment(assignment_id: number) {
+        const new_assignment = new assignment(assignment_id);
+        await new_assignment.assignment_init(assignment_id);
+
+        return new_assignment;
     }
 
     
@@ -79,21 +77,21 @@ class assignment {
     locked_for_user: boolean|null = null; //제출 가능 여부
 
     constructor(id: number) {
-        this.assignment_init(id);
     }
 
-    assignment_init(assignment_id: number) {
-        const assignment_info = this.api.direct_request(`assignments/${assignment_id}`);
-        if (assignment_info != null) {
-            this.id = assignment_info["id"];
-            this.name = assignment_info["name"];
-            this.description = assignment_info["description"];
-            this.due_at = assignment_info["due_at"];
-            this.unlock_at = assignment_info["unlock_at"];
-            this.lock_at = assignment_info["lock_at"];
-            this.html_url = assignment_info["html_url"];
-            this.locked_for_user = assignment_info["locked_for_user"];
-        }
+    async assignment_init(assignment_id: number) {
+        this.api.direct_request(`assignments/${assignment_id}`).then((json) => {
+            if (json != null) {
+                this.id = json["id"];
+                this.name = json["name"];
+                this.description = json["description"];
+                this.due_at = json["due_at"];
+                this.unlock_at = json["unlock_at"];
+                this.lock_at = json["lock_at"];
+                this.html_url = json["html_url"];
+                this.locked_for_user = json["locked_for_user"];
+            }
+        });
     }
 }
 
@@ -107,23 +105,26 @@ class discussion_topics{
     locked_for_user: boolean|null = null; //제출 가능 여부
 
     constructor(id: number) {
-        this.discussion_topics_init(id);
     }
 
-    discussion_topics_init(discussion_topics_id: number) {
-        const discussion_topics_info = this.api.direct_request(`discussion_topics/${discussion_topics_id}`);
-        if (discussion_topics_info != null) {
-            this.id = discussion_topics_info["id"];
-            this.title = discussion_topics_info["title"];
-            this.message = discussion_topics_info["message"];
-            this.html_url = discussion_topics_info["html_url"];
-            this.locked_for_user = discussion_topics_info["locked_for_user"];
-        }
+    async discussion_topics_init(discussion_topics_id: number) {
+        this.api.direct_request(`discussion_topics/${discussion_topics_id}`).then((json) => {
+            if (json != null) {
+                this.id = json["id"];
+                this.title = json["title"];
+                this.message = json["message"];
+                this.html_url = json["html_url"];
+                this.locked_for_user = json["locked_for_user"];
+            }
+        });
     }
 
 }
 
 const lms = new LMS_API;
-const courses = lms.get_courses();
-console.log(courses);
+const course = lms.get_course(24579).then((course) => {
+    console.log(course);
+});
+
+
 
