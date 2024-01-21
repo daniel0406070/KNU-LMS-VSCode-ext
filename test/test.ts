@@ -1,6 +1,8 @@
 import { json } from "stream/consumers";
 
-let Token_Json = JSON.parse("../token.json");
+const fs = require('fs');
+const jsonfile = fs.readFileSync("../token.json");
+const Token_Json = JSON.parse(jsonfile);
 
 const API_URL = "https://canvas.knu.ac.kr";
 const API_TOKEN = Token_Json["token"];
@@ -14,16 +16,16 @@ class LMS_API {
     direct_request(method: string)  {
         const url = `${API_URL}/api/v1/${method}?access_token=${API_TOKEN}`;
 
-        let answer = null;
         fetch(url)
             .then((response) => response.json())
-            .then((json) => {answer = json;})
+            .then((json) => {
+                console.log(json);
+                return json;
+            })
             .catch((error) => {
-                console.log(error)
-                answer = null;   
+                console.log(error);
+                return null;
             });
-
-        return answer;
     }
 
     get_courses() {
@@ -120,4 +122,8 @@ class discussion_topics{
     }
 
 }
+
+const lms = new LMS_API;
+const courses = lms.get_courses();
+console.log(courses);
 
